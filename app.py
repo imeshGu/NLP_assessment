@@ -4,72 +4,7 @@ import pandas as pd
 import plotly.express as px
 
 
-from typing import Iterable
-
-from lib.filterwidget import OurFilter
 from toolz import pluck
-
-MY_TABLE = "CUSTOMERS"
-
-def _get_active_filters() -> filter:
-    return filter(lambda _: _.is_enabled, st.session_state.filters)
-
-def _is_any_filter_enabled() -> bool:
-    return any(pluck("is_enabled", st.session_state.filters))
-
-def _get_human_filter_names(_iter: Iterable) -> Iterable:
-    return pluck("human_name", _iter)
-
-def draw_sidebar():
-    """Should include dynamically generated filters"""
-
-    with st.sidebar:
-        selected_filters = st.multiselect(
-            "Select which filters to enable",
-            list(_get_human_filter_names(st.session_state.filters)),
-            [],
-        )
-        for _f in st.session_state.filters:
-            if _f.human_name in selected_filters:
-                _f.enable()
-
-        if _is_any_filter_enabled():
-            with st.form(key="input_form"):
-
-                for _f in _get_active_filters():
-                    _f.create_widget()
-                st.session_state.clicked = st.form_submit_button(label="Submit")
-        else:
-            st.write("Please enable a filter")
-
-if __name__ == "__main__":
-    # Initialize the filters
-    session = init_connection()
-    OurFilter.session = session
-    OurFilter.table_name = MY_TABLE
-
-    st.session_state.filters = (
-        OurFilter(
-            human_name="Current customer",
-            table_column="is_current_customer",
-            widget_id="current_customer",
-            widget_type=st.checkbox,
-        ),
-        OurFilter(
-            human_name="Tenure",
-            table_column="years_tenure",
-            widget_id="tenure_slider",
-            widget_type=st.select_slider,
-        ),
-        OurFilter(
-            human_name="Weekly workout count",
-            table_column="average_weekly_workout_count",
-            widget_id="workouts_slider",
-            widget_type=st.select_slider,
-        ),
-    )
-
-    draw_sidebar()
 
 
 def cat_questions(question, type):
@@ -105,6 +40,7 @@ def iter(question):
 
 content1 = st.container()
 content2 = st.container()
+content3 = st.container()
 
 df = pd.read_csv('data.csv')
 
@@ -117,14 +53,34 @@ print(cate_count)
 # Rename the columns
 cate_count.columns = ['value', 'count']
 
-st.write("hellow world")
 with content1:
-    st.title("Row Level look")
+    st.write("Hey, Imesh HERE!!!!!!")
+
+    st.title("Questions By Categories")
     fig = px.pie(cate_count,values='count',names='value')
     st.write(fig)
 
+    
+
 with content2:
     st.title("Row Level look")
-    st.dataframe(df,use_container_width=True,hide_index=True)
+
+    u_in = st.text_input("Search title?")
+
+    new_df=df[['document_title','question_text','short_answer1','short_answer2','short_answer3','short_answer4']]
+    if(len(u_in)>0):
+        new_df = new_df[new_df['document_title'].str.contains(u_in)]
+    st.dataframe(new_df,use_container_width=True,hide_index=True)
+
+with content3:
+    st.title("Breif on the task")
+    st.write("As an initial step of the assignment the data set was examined")
+    st.write("However I was able examin some of the issues in the dataset")
+    st.write("          Retreiving the original text from token was inconsitent ")
+    st.write("          Reading annotations from start_byte and end_byte was unsuccessfull")
+    st.write("I was unable to make meaningfull retreival with annotations due to above reasons")
+
+
+
 
 
