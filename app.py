@@ -69,7 +69,8 @@ with content2:
 
     new_df=df[['document_title','question_text','short_answer1','short_answer2','short_answer3','short_answer4']]
     if(len(u_in)>0):
-        new_df = new_df[new_df['document_title'].str.contains(u_in)]
+        new_df = new_df[new_df['document_title'].str.lower().str.contains(u_in.lower())]
+
     st.dataframe(new_df,use_container_width=True,hide_index=True)
 
 with content3:
